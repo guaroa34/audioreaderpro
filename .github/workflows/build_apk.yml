@@ -30,6 +30,11 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Aceptar licencias Android
+        run: |
+          yes | flutter doctor --android-licenses 2>&1 || true
+          flutter doctor -v 2>&1 || true
+
       - name: Instalar dependencias Python
         run: |
           pip install flet yt-dlp requests
@@ -40,13 +45,19 @@ jobs:
             --project "AudioReader Pro" \
             --org com.tudominio \
             --bundle-id com.tudominio.audioreaderpro \
-            --description "AudioBook Player" \
+            --verbose \
             2>&1
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
 
-      - name: Mostrar APK generado
+      - name: Mostrar resultado (siempre)
         if: always()
         run: |
-          find build/ -name "*.apk" 2>/dev/null || echo "No se encontró APK"
+          echo "=== APKs encontrados ==="
+          find . -name "*.apk" 2>/dev/null || echo "No APK"
+          echo "=== Logs de build ==="
+          find . -name "*.log" 2>/dev/null | head -5
+          cat build/android/*.log 2>/dev/null | tail -80 || true
 
       - name: Subir APK como artefacto
         uses: actions/upload-artifact@v4
