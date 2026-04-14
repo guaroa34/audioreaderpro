@@ -1,0 +1,3 @@
+flet
+yt-dlp
+requests
