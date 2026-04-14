@@ -30,8 +30,17 @@ jobs:
 
       - name: Compilar APK
         run: |
-          yes | buildozer android debug 2>&1
-        continue-on-error: false
+          yes | buildozer -v android debug 2>&1 || true
+
+      - name: Mostrar log si falla
+        if: always()
+        run: |
+          echo "=== ÚLTIMAS 100 LÍNEAS DEL LOG ==="
+          find . -name "*.log" 2>/dev/null | head -5
+          find ~/.buildozer -name "*.log" 2>/dev/null | head -5
+          cat ~/.buildozer/android/platform/build-arm64-v8a_armeabi-v7a/dists/audioreaderpro/build.log 2>/dev/null | tail -100 || true
+          echo "=== APKs generados ==="
+          find . -name "*.apk" 2>/dev/null
 
       - name: Subir APK como artefacto
         uses: actions/upload-artifact@v4
