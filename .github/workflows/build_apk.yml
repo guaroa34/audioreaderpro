@@ -1,0 +1,41 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            python3-pip python3-setuptools python3-dev \
+            git zip unzip openjdk-17-jdk \
+            libffi-dev libssl-dev libgdbm-dev \
+            libegl1-mesa aidl autoconf libtool \
+            pkg-config cmake ninja-build
+
+      - name: Instalar buildozer y cython
+        run: |
+          pip3 install --upgrade pip
+          pip3 install buildozer cython==0.29.33 python-for-android
+
+      - name: Compilar APK
+        run: |
+          yes | buildozer android debug 2>&1
+        continue-on-error: false
+
+      - name: Subir APK como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioReaderPro-APK
+          path: bin/*.apk
+          retention-days: 7
